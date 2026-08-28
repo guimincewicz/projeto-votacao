@@ -10,6 +10,8 @@ import com.cooperative.voting.dto.VotingResultResponse;
 import com.cooperative.voting.service.AgendaService;
 import com.cooperative.voting.service.VoteService;
 import com.cooperative.voting.service.VotingSessionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/agendas")
 @RequiredArgsConstructor
+@Tag(name = "Pautas", description = "Gerenciamento de pautas, sessões e votos")
 public class AgendaController {
 
     private final AgendaService agendaService;
@@ -32,12 +35,14 @@ public class AgendaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Cria uma pauta")
     public AgendaResponse create(@Valid @RequestBody CreateAgendaRequest request) {
         return agendaService.create(request);
     }
 
     @PostMapping("/{agendaId}/sessions")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Abre uma sessão de votação para uma pauta")
     public SessionResponse openSession(
             @PathVariable String agendaId,
             @Valid @RequestBody(required = false) OpenSessionRequest request
@@ -51,6 +56,7 @@ public class AgendaController {
 
     @PostMapping("/{agendaId}/votes")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Registra o voto de um associado")
     public VoteResponse registerVote(
             @PathVariable String agendaId,
             @Valid @RequestBody RegisterVoteRequest request
@@ -59,6 +65,7 @@ public class AgendaController {
     }
 
     @GetMapping("/{agendaId}/result")
+    @Operation(summary = "Consulta o resultado da votação")
     public VotingResultResponse getResult(@PathVariable String agendaId) {
         return voteService.getResult(agendaId);
     }
