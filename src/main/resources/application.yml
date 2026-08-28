@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: api-votacao
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/voting}
+      auto-index-creation: true
