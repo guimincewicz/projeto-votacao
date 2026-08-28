@@ -1,0 +1,11 @@
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\AgendaResponse.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\CreateAgendaRequest.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\OpenSessionRequest.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\RegisterVoteRequest.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\SessionResponse.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\VoteResponse.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\dto\VotingResultResponse.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\model\Agenda.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\model\Vote.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\model\VoteOption.java
+C:\Users\Gui\Desktop\DT\src\main\java\com\cooperative\voting\model\VotingSession.java
