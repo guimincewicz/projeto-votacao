@@ -6,7 +6,6 @@ import com.cooperative.voting.exception.ConflictException;
 import com.cooperative.voting.exception.NotFoundException;
 import com.cooperative.voting.model.VotingSession;
 import com.cooperative.voting.repository.VotingSessionRepository;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ public class VotingSessionService {
 
     private final AgendaService agendaService;
     private final VotingSessionRepository votingSessionRepository;
-    private final Clock clock;
     private final MessageSource messageSource;
 
     public SessionResponse open(String agendaId, OpenSessionRequest request) {
@@ -34,7 +32,7 @@ public class VotingSessionService {
         int durationMinutes = request.durationMinutes() == null
                 ? DEFAULT_DURATION_MINUTES
                 : request.durationMinutes();
-        Instant openedAt = Instant.now(clock);
+        Instant openedAt = Instant.now();
 
         VotingSession session = new VotingSession(
                 agendaId,

@@ -10,7 +10,6 @@ import com.cooperative.voting.model.Vote;
 import com.cooperative.voting.model.VoteOption;
 import com.cooperative.voting.model.VotingSession;
 import com.cooperative.voting.repository.VoteRepository;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class VoteService {
     private final AgendaService agendaService;
     private final VotingSessionService votingSessionService;
     private final VoteRepository voteRepository;
-    private final Clock clock;
     private final MessageSource messageSource;
     private final VoterEligibilityService voterEligibilityService;
 
@@ -37,7 +35,7 @@ public class VoteService {
         agendaService.getRequired(agendaId);
 
         VotingSession session = votingSessionService.getForAgenda(agendaId);
-        if (!Instant.now(clock).isBefore(session.getClosesAt())) {
+        if (!Instant.now().isBefore(session.getClosesAt())) {
             log.warn("Vote attempted after session close for agenda {}", agendaId);
             throw new BusinessException(message("voting-session.closed"));
         }
@@ -48,7 +46,7 @@ public class VoteService {
                 agendaId,
                 request.associateId().trim(),
                 request.vote(),
-                Instant.now(clock)
+                Instant.now()
         );
 
         try {

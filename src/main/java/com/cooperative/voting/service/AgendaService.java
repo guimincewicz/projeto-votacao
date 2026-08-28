@@ -5,7 +5,6 @@ import com.cooperative.voting.dto.CreateAgendaRequest;
 import com.cooperative.voting.exception.NotFoundException;
 import com.cooperative.voting.model.Agenda;
 import com.cooperative.voting.repository.AgendaRepository;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,13 @@ public class AgendaService {
     private static final Logger log = LoggerFactory.getLogger(AgendaService.class);
 
     private final AgendaRepository agendaRepository;
-    private final Clock clock;
     private final MessageSource messageSource;
 
     public AgendaResponse create(CreateAgendaRequest request) {
         Agenda agenda = new Agenda(
                 request.title().trim(),
                 request.description().trim(),
-                Instant.now(clock)
+                Instant.now()
         );
 
         Agenda savedAgenda = agendaRepository.save(agenda);
