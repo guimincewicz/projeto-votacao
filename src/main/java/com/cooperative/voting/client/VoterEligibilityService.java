@@ -53,12 +53,12 @@ public class VoterEligibilityService {
                 throw new BusinessException(message("associate.not-allowed"));
             }
         } catch (RestClientException exception) {
-            // O serviço externo usa HTTP 404 para informar CPF inválido.
+            // O serviço externo usa HTTP 404 para informar CPF inválido
             if (isInvalidCpf(exception)) {
                 throw new BusinessException(message("cpf.invalid"));
             }
 
-            // Outras falhas impedem a validação e são tratadas como indisponibilidade.
+            // Outras falhas impedem a validação e são tratadas como indisponibilidade
             log.warn("Could not validate voter eligibility", exception);
             throw new BusinessException(HttpStatus.SERVICE_UNAVAILABLE, message("user-info.unavailable"));
         }
