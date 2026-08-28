@@ -11,6 +11,9 @@ external:
     enabled: ${USER_INFO_ENABLED:false}
     base-url: ${USER_INFO_BASE_URL:https://user-info.herokuapp.com}
 
+mobile:
+  callback-base-url: ${MOBILE_CALLBACK_BASE_URL:http://localhost:8080}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

@@ -25,9 +25,6 @@ dto           dados de entrada e saída da API
 client        consulta de elegibilidade por CPF
 exception     erros tratados pela API
 ```
-
-Não foi utilizada uma arquitetura mais complexa porque, para o tamanho do desafio, essas camadas já separam bem as responsabilidades.
-
 ## Como executar
 
 É necessário ter Java 17, Maven e MongoDB instalados.
@@ -222,6 +219,20 @@ mvn clean test
 
 Os testes unitários cobrem criação de pauta, abertura de sessão, duração padrão e personalizada, voto duplicado, sessão encerrada, empate e validação de CPF.
 
-## Observação sobre o contrato mobile
+## Telas para o aplicativo mobile
 
-O enunciado menciona telas `FORMULARIO` e `SELECAO`, mas o contrato JSON completo desse cliente não foi fornecido. Por isso, foram implementados apenas os endpoints REST do domínio. Caso esse contrato seja disponibilizado, a representação específica pode ser criada em DTOs separados.
+O Anexo 1 define telas JSON interpretadas pelo aplicativo mobile. Foram adicionadas telas do tipo `FORMULARIO` para as operações que precisam de dados do usuário:
+
+| Endpoint | Tela retornada |
+| --- | --- |
+| GET `/api/v1/mobile/agendas/formulario` | Cadastro de pauta |
+| GET `/api/v1/mobile/agendas/{agendaId}/sessao` | Abertura de sessão |
+| GET `/api/v1/mobile/agendas/{agendaId}/voto` | Registro de voto |
+
+As telas retornam os campos, botões, URL e body definidos no Anexo 1. Quando o usuário aciona um botão, o aplicativo envia um `POST` para os endpoints REST já existentes.
+
+O domínio das URLs de callback pode ser alterado para emulador, dispositivo físico ou ambiente remoto:
+
+```text
+MOBILE_CALLBACK_BASE_URL=http://seu-dominio:8080
+```
