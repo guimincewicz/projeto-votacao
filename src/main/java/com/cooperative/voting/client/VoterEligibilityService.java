@@ -36,7 +36,7 @@ public class VoterEligibilityService {
     /**
      * Valida se o CPF está apto a votar.
      * Quando a integração está desabilitada, permite a votação para facilitar
-     * a execução local e os testes sem depender da API externa.
+     * a execução local e os testes sem depender da API externa
      */
     public void ensureEligible(String cpf) {
         if (!enabled) {
@@ -44,7 +44,6 @@ public class VoterEligibilityService {
         }
 
         try {
-            // Consulta o status do CPF no serviço externo configurado.
             UserInfoResponse response = restClient.get()
                     .uri("/users/{cpf}", cpf)
                     .retrieve()
@@ -54,12 +53,10 @@ public class VoterEligibilityService {
                 throw new BusinessException(message("associate.not-allowed"));
             }
         } catch (RestClientException exception) {
-            // O serviço externo usa HTTP 404 para informar CPF inválido
             if (isInvalidCpf(exception)) {
                 throw new NotFoundException(message("cpf.invalid"));
             }
 
-            // Outras falhas impedem a validação e são tratadas como indisponibilidade
             log.warn("Could not validate voter eligibility", exception);
             throw new BusinessException(HttpStatus.SERVICE_UNAVAILABLE, message("user-info.unavailable"));
         }
