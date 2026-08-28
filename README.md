@@ -27,7 +27,7 @@ exception     erros tratados pela API
 ```
 ## Como executar
 
-É necessário ter Java 17, Maven e MongoDB instalados.
+Para executar sem Docker, é necessário ter Java 17, Maven e MongoDB instalados.
 
 ```bash
 mvn clean test
@@ -159,15 +159,23 @@ O resultado não busca todos os votos na memória. A contagem é feita com consu
 
 Também foi incluído um teste simples de carga com K6 em `performance/voting-test.js`.
 
-Depois de criar uma pauta e abrir a sessão, execute:
+Com a validação externa de CPF desativada, crie uma pauta nova, abra uma sessão e execute:
 
 ```bash
 k6 run -e AGENDA_ID=ID_DA_PAUTA performance/voting-test.js
 ```
 
+No Windows, caso o K6 não esteja instalado:
+
+```powershell
+winget install k6 --source winget
+```
+
+O script faz 200 votos com até 20 usuários virtuais simultâneos. Use uma pauta nova a cada execução para não receber votos duplicados de testes anteriores.
+
 ## Integração de CPF
 
-Por padrão, a consulta externa fica desabilitada para facilitar a execução local:
+Por padrão, a consulta externa fica desabilitada para facilitar a execução local e os testes:
 
 ```text
 USER_INFO_ENABLED=false
@@ -179,15 +187,19 @@ Quando habilitada, a aplicação consulta:
 GET https://user-info.herokuapp.com/users/{cpf}
 ```
 
-O status `ABLE_TO_VOTE` permite o voto. CPF inválido, associado sem permissão ou indisponibilidade do serviço retornam erro apropriado.
+O status `ABLE_TO_VOTE` permite o voto. CPF inválido retorna `404`, associado sem permissão retorna `422` e indisponibilidade do serviço retorna `503`.
 
-Para habilitar:
+Durante o desenvolvimento deste projeto, a URL originalmente fornecida pelo desafio retornou a página `No such app` da Heroku. Por isso, a integração permanece desativada por padrão. Caso seja fornecida uma URL funcional, é possível habilitá-la e configurá-la.
 
-```bash
-USER_INFO_ENABLED=true
+Com Docker no PowerShell:
+
+```powershell
+$env:USER_INFO_ENABLED = "true"
+$env:USER_INFO_BASE_URL = "https://url-do-servico"
+docker compose up -d --force-recreate
 ```
 
-Também é possível alterar a URL usando `USER_INFO_BASE_URL`.
+Sem Docker, defina as mesmas variáveis de ambiente antes de executar `mvn spring-boot:run`.
 
 ## Erros
 
@@ -233,6 +245,9 @@ As telas retornam os campos, botões, URL e body definidos no Anexo 1. Quando o 
 
 O domínio das URLs de callback pode ser alterado para emulador, dispositivo físico ou ambiente remoto:
 
-```text
-MOBILE_CALLBACK_BASE_URL=http://seu-dominio:8080
+```powershell
+$env:MOBILE_CALLBACK_BASE_URL = "http://192.168.0.10:8080"
+docker compose up -d --force-recreate
 ```
+
+No exemplo, o IP deve ser o endereço da máquina na rede local. Sem Docker, defina a variável antes de executar `mvn spring-boot:run`.
