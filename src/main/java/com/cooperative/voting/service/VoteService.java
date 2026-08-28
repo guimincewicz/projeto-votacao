@@ -11,11 +11,13 @@ import com.cooperative.voting.model.VotingSession;
 import com.cooperative.voting.repository.VoteRepository;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.context.MessageSource;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class VoteService {
     private final VotingSessionService votingSessionService;
     private final VoteRepository voteRepository;
     private final Clock clock;
+    private final MessageSource messageSource;
 
     public VoteResponse register(String agendaId, RegisterVoteRequest request) {
         agendaService.getRequired(agendaId);
@@ -34,7 +37,7 @@ public class VoteService {
         VotingSession session = votingSessionService.getForAgenda(agendaId);
         if (!Instant.now(clock).isBefore(session.getClosesAt())) {
             log.warn("Vote attempted after session close for agenda {}", agendaId);
-            throw new SessionClosedException("Voting session is closed");
+            throw new SessionClosedException(message("voting-session.closed"));
         }
 
         Vote vote = new Vote(
@@ -50,7 +53,7 @@ public class VoteService {
             return toResponse(savedVote);
         } catch (DuplicateKeyException exception) {
             log.warn("Duplicate vote attempted for agenda {}", agendaId);
-            throw new ConflictException("Associate has already voted on this agenda");
+            throw new ConflictException(message("vote.duplicate"));
         }
     }
 
@@ -81,5 +84,9 @@ public class VoteService {
                 vote.getVote(),
                 vote.getCreatedAt()
         );
+    }
+
+    private String message(String key) {
+        return messageSource.getMessage(key, null, Locale.getDefault());
     }
 }

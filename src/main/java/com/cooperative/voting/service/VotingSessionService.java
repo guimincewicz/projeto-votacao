@@ -8,11 +8,13 @@ import com.cooperative.voting.model.VotingSession;
 import com.cooperative.voting.repository.VotingSessionRepository;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.context.MessageSource;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class VotingSessionService {
     private final AgendaService agendaService;
     private final VotingSessionRepository votingSessionRepository;
     private final Clock clock;
+    private final MessageSource messageSource;
 
     public SessionResponse open(String agendaId, OpenSessionRequest request) {
         agendaService.getRequired(agendaId);
@@ -44,13 +47,13 @@ public class VotingSessionService {
             log.info("Voting session opened for agenda {}", agendaId);
             return toResponse(savedSession);
         } catch (DuplicateKeyException exception) {
-            throw new ConflictException("A voting session already exists for this agenda");
+            throw new ConflictException(message("voting-session.already-exists"));
         }
     }
 
     public VotingSession getForAgenda(String agendaId) {
         return votingSessionRepository.findByAgendaId(agendaId)
-                .orElseThrow(() -> new NotFoundException("Voting session not found"));
+                .orElseThrow(() -> new NotFoundException(message("voting-session.not-found")));
     }
 
     private SessionResponse toResponse(VotingSession session) {
@@ -60,5 +63,9 @@ public class VotingSessionService {
                 session.getOpenedAt(),
                 session.getClosesAt()
         );
+    }
+
+    private String message(String key) {
+        return messageSource.getMessage(key, null, Locale.getDefault());
     }
 }
