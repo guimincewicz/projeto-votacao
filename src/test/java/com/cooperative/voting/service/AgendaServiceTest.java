@@ -2,12 +2,15 @@ package com.cooperative.voting.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.cooperative.voting.dto.CreateAgendaRequest;
+import com.cooperative.voting.exception.NotFoundException;
 import com.cooperative.voting.model.Agenda;
 import com.cooperative.voting.repository.AgendaRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -33,5 +36,13 @@ class AgendaServiceTest {
         assertEquals("Orçamento anual", response.title());
         assertEquals("Votação anual", response.description());
         assertNotNull(response.createdAt());
+    }
+
+    @Test
+    void shouldRejectMissingAgenda() {
+        when(agendaRepository.findById("agenda-1")).thenReturn(Optional.empty());
+        AgendaService service = new AgendaService(agendaRepository, messageSource);
+
+        assertThrows(NotFoundException.class, () -> service.getRequired("agenda-1"));
     }
 }

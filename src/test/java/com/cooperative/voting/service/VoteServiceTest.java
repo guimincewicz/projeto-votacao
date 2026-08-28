@@ -11,6 +11,7 @@ import com.cooperative.voting.client.VoterEligibilityService;
 import com.cooperative.voting.dto.RegisterVoteRequest;
 import com.cooperative.voting.exception.BusinessException;
 import com.cooperative.voting.exception.ConflictException;
+import com.cooperative.voting.exception.NotFoundException;
 import com.cooperative.voting.model.Vote;
 import com.cooperative.voting.model.VoteOption;
 import com.cooperative.voting.model.VotingSession;
@@ -55,12 +56,25 @@ class VoteServiceTest {
     }
 
     @Test
+    void shouldRegisterNoVote() {
+        when(votingSessionService.getForAgenda("agenda-1")).thenReturn(openSession());
+        when(voteRepository.save(any(Vote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        VoteService service = service();
+
+        var response = service.register("agenda-1", request(VoteOption.NO));
+
+        assertEquals(VoteOption.NO, response.vote());
+        verify(voterEligibilityService).ensureEligible("12345678909");
+    }
+
+    @Test
     void shouldRejectDuplicateVoteFromDatabaseConstraint() {
         when(votingSessionService.getForAgenda("agenda-1")).thenReturn(openSession());
         when(voteRepository.save(any(Vote.class))).thenThrow(new DuplicateKeyException("duplicate key"));
         VoteService service = service();
+        RegisterVoteRequest request = request(VoteOption.NO);
 
-        assertThrows(ConflictException.class, () -> service.register("agenda-1", request(VoteOption.NO)));
+        assertThrows(ConflictException.class, () -> service.register("agenda-1", request));
     }
 
     @Test
@@ -72,8 +86,20 @@ class VoteServiceTest {
         );
         when(votingSessionService.getForAgenda("agenda-1")).thenReturn(closedSession);
         VoteService service = service();
+        RegisterVoteRequest request = request(VoteOption.YES);
 
-        assertThrows(BusinessException.class, () -> service.register("agenda-1", request(VoteOption.YES)));
+        assertThrows(BusinessException.class, () -> service.register("agenda-1", request));
+        verifyNoInteractions(voterEligibilityService, voteRepository);
+    }
+
+    @Test
+    void shouldRejectVoteWithoutSession() {
+        when(votingSessionService.getForAgenda("agenda-1"))
+                .thenThrow(new NotFoundException("Sessão de votação não encontrada"));
+        VoteService service = service();
+        RegisterVoteRequest request = request(VoteOption.YES);
+
+        assertThrows(NotFoundException.class, () -> service.register("agenda-1", request));
         verifyNoInteractions(voterEligibilityService, voteRepository);
     }
 
@@ -87,6 +113,24 @@ class VoteServiceTest {
 
         assertEquals(20, result.totalVotes());
         assertEquals("TIED", result.result());
+    }
+
+    @Test
+    void shouldReturnApprovedResult() {
+        when(voteRepository.countByAgendaIdAndVote("agenda-1", VoteOption.YES)).thenReturn(12L);
+        when(voteRepository.countByAgendaIdAndVote("agenda-1", VoteOption.NO)).thenReturn(5L);
+        VoteService service = service();
+
+        assertEquals("APPROVED", service.getResult("agenda-1").result());
+    }
+
+    @Test
+    void shouldReturnRejectedResult() {
+        when(voteRepository.countByAgendaIdAndVote("agenda-1", VoteOption.YES)).thenReturn(4L);
+        when(voteRepository.countByAgendaIdAndVote("agenda-1", VoteOption.NO)).thenReturn(9L);
+        VoteService service = service();
+
+        assertEquals("REJECTED", service.getResult("agenda-1").result());
     }
 
     private VoteService service() {
