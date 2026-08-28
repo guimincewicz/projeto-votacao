@@ -1,10 +1,11 @@
 package com.cooperative.voting.service;
 
+import com.cooperative.voting.client.VoterEligibilityService;
 import com.cooperative.voting.dto.RegisterVoteRequest;
 import com.cooperative.voting.dto.VoteResponse;
 import com.cooperative.voting.dto.VotingResultResponse;
 import com.cooperative.voting.exception.ConflictException;
-import com.cooperative.voting.exception.SessionClosedException;
+import com.cooperative.voting.exception.BusinessException;
 import com.cooperative.voting.model.Vote;
 import com.cooperative.voting.model.VoteOption;
 import com.cooperative.voting.model.VotingSession;
@@ -30,6 +31,7 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final Clock clock;
     private final MessageSource messageSource;
+    private final VoterEligibilityService voterEligibilityService;
 
     public VoteResponse register(String agendaId, RegisterVoteRequest request) {
         agendaService.getRequired(agendaId);
@@ -37,8 +39,10 @@ public class VoteService {
         VotingSession session = votingSessionService.getForAgenda(agendaId);
         if (!Instant.now(clock).isBefore(session.getClosesAt())) {
             log.warn("Vote attempted after session close for agenda {}", agendaId);
-            throw new SessionClosedException(message("voting-session.closed"));
+            throw new BusinessException(message("voting-session.closed"));
         }
+
+        voterEligibilityService.ensureEligible(request.cpf());
 
         Vote vote = new Vote(
                 agendaId,

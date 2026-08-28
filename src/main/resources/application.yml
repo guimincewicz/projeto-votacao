@@ -5,3 +5,8 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/voting}
       auto-index-creation: true
+
+external:
+  user-info:
+    enabled: ${USER_INFO_ENABLED:false}
+    base-url: ${USER_INFO_BASE_URL:https://user-info.herokuapp.com}

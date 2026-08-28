@@ -29,12 +29,12 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
-    @ExceptionHandler(SessionClosedException.class)
-    public ResponseEntity<ApiError> handleSessionClosed(
-            SessionClosedException exception,
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiError> handleBusinessException(
+            BusinessException exception,
             HttpServletRequest request
     ) {
-        return buildError(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage(), request);
+        return buildError(exception.getStatus(), exception.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
