@@ -1,6 +1,7 @@
 package com.cooperative.voting.client;
 
 import com.cooperative.voting.exception.BusinessException;
+import com.cooperative.voting.exception.NotFoundException;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class VoterEligibilityService {
         } catch (RestClientException exception) {
             // O serviço externo usa HTTP 404 para informar CPF inválido
             if (isInvalidCpf(exception)) {
-                throw new BusinessException(message("cpf.invalid"));
+                throw new NotFoundException(message("cpf.invalid"));
             }
 
             // Outras falhas impedem a validação e são tratadas como indisponibilidade

@@ -8,6 +8,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.cooperative.voting.exception.BusinessException;
+import com.cooperative.voting.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,12 +55,11 @@ class VoterEligibilityServiceTest {
         server.expect(requestTo(BASE_URL + "/users/12345678909"))
                 .andRespond(withStatus(HttpStatus.NOT_FOUND));
 
-        BusinessException exception = assertThrows(
-                BusinessException.class,
+        assertThrows(
+                NotFoundException.class,
                 () -> service.ensureEligible("12345678909")
         );
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatus());
         server.verify();
     }
 
